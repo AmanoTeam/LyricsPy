@@ -22,7 +22,7 @@ pip install -U git+https://github.com/AmanoTeam/LyricsPy
 
 ## Usage:
 
-To use duckpy is easy, but let's see some examples:
+To use LyricsPY is easy, but let's see some examples:
 
 ### First example:
 
