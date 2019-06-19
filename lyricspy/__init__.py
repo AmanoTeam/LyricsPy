@@ -19,12 +19,12 @@ def letra(query):
     c = soup.find("div", "lyric-title g-1")
     musica = c.find('h1').get_text()
     autor = c.find('a').get_text()
-    ret = {'autor': autor, 'musica': musica, 'letra': b, 'link': r.url}
+    ret = {'autor': autor, 'musica': musica, 'letra': b.replace('\n\n\n','\n\n'), 'link': r.url}
     if 'a' not in tr:
         b = ''
         for i in tr.find_all('p'):
             b += md(str(i))
-        ret['traducao'] = b
+        ret['traducao'] = b.replace('\n\n\n','\n\n')
 
     return ret
 
