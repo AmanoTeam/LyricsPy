@@ -6,7 +6,7 @@ import duckpy
 ddg = duckpy.Client()
 
 
-def letra(query):
+def letra(query,limit=4):
     tr = 'a'
     query = query.replace('www.letras', 'm.letras')
     r = requests.get(query)
@@ -40,4 +40,4 @@ def auto(query):
         except:
             pass
 
-    return result[:4]
+    return result[:limit]
