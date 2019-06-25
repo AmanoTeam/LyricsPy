@@ -1,7 +1,9 @@
 import requests
 from markdownify import markdownify as md
 from bs4 import BeautifulSoup
-import googlesearch
+import duckpy
+
+ddg = duckpy.Client()
 
 
 def letra(query):
@@ -31,11 +33,11 @@ def letra(query):
 
 def auto(query):
     result = []
-    for i in googlesearch.search('site:letras.mus.br ' + query, stop=4):
+    for i in ddg.search('site:letras.mus.br ' + query):
         try:
-            a = letra(i)
+            a = letra(i['url'])
             result.append(a)
         except:
             pass
 
-    return result
+    return result[:4]
