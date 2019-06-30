@@ -1,5 +1,4 @@
 import requests
-from markdownify import markdownify as md
 from bs4 import BeautifulSoup
 import duckpy
 
