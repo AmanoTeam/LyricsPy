@@ -1,42 +1,38 @@
 import requests
-from markdownify import markdownify as md
 from bs4 import BeautifulSoup
+import json
 import duckpy
 import re
 
 ddg = duckpy.Client()
-
-
-def letra(query,limit=4):
-    tr = 'a'
-    query = query.replace('www.letras', 'm.letras')
+   
+def letra(query):
     r = requests.get(query)
     soup = BeautifulSoup(r.text, "html.parser")
-    a = soup.find('div', "lyric-cnt g-1")
-    if a is None:
-        a = soup.find('div', "lyric-tra_l")
-        tr = soup.find('div', "lyric-tra_r")
-    b = ''
-    for i in a.find_all('p'):
-        b += md(str(i))
-    c = soup.find("div", "lyric-title g-1")
-    musica = c.find('h1').get_text()
-    autor = c.find('a').get_text()
-    ret = {'autor': autor, 'musica': musica, 'letra': b.replace('\n\n\n','\n\n'), 'link': r.url}
-    if 'a' not in tr:
-        b = ''
-        for i in tr.find_all('p'):
-            b += md(str(i))
-        ret['traducao'] = b.replace('\n\n\n','\n\n')
-
+    infos = json.loads(soup.find_all('script', type="application/ld+json")[1].text)
+    letra = soup.find('div', class_='cnt-letra p402_premium')
+    letra = re.sub(r' ?<(/)?div.*?> ?', '', str(letra))
+    ret = {
+            "musica":infos['name'],
+            "autor":infos['byArtist']['name'],
+            "link":infos['url'],
+            "thumb":infos['image'],
+            "descricao":infos['description'],
+            "letra":letra
+            }
+    if soup.find('a', class_='lm_lang lm_lang_pt'):
+        r = requests.get(query+'/traducao.html')
+        soup = BeautifulSoup(r.text, "html.parser")
+        traducao = soup.find('div', class_='cnt-trad_r')
+        traducao = re.sub(r' ?<(/)?div.*?> ?|<(/)?span>| ?<h3>.*?</h3> ?', '', str(traducao))
+        ret["traducao"] = traducao
     return ret
-
 
 def auto(query, limit=4):
     result = []
     n = 0
     for i in ddg.search('site:letras.mus.br ' + query):
-        if re.match(r'^(https?://)?(letras\.mus.br/|(m\.|www\.)?letras\.mus\.br/).+', i['url']):
+        if re.match(r'^(https?://)?(letras\.mus.br/|(m\.|www\.)?letras\.mus\.br/).+', i['url']) and not '/traducao.html' in i['url']:
             try:
                 a = letra(i['url'])
                 result.append(a)
@@ -45,5 +41,4 @@ def auto(query, limit=4):
                 pass
         if n == limit:
             break
-
     return result
