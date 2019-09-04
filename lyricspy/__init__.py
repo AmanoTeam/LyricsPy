@@ -3,6 +3,7 @@ from markdownify import markdownify as md
 from bs4 import BeautifulSoup
 import duckpy
 import re
+import urllib.parse
 
 ddg = duckpy.Client()
 
@@ -34,6 +35,7 @@ def letra(query,limit=4):
 
 def auto(query, limit=4):
     result = []
+    query = urllib.parse.quote(query)
     n = 0
     for i in ddg.search('site:letras.mus.br ' + query):
         if re.match(r'^(https?://)?(letras\.mus.br/|(m\.|www\.)?letras\.mus\.br/).+', i['url']):
