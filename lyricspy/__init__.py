@@ -34,7 +34,7 @@ def auto(query, limit=4):
     result = []
     query = urllib.parse.quote(query)
     n = 0
-    for i in googlesearch.search('site:letras.mus.br ' + query, stop=30):
+    for i in googlesearch.search('site:letras.mus.br ' + query, num=30, pause=2):
         if re.match(r'^(https?://)?(letras\.mus.br/|(m\.|www\.)?letras\.mus\.br/).+', i):
             try:
                 a = letra(i)
