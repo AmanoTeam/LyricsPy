@@ -2,7 +2,6 @@ import requests
 from markdownify import markdownify as md
 from bs4 import BeautifulSoup
 import re
-import urllib.parse
 import googlesearch
 
 def letra(query,limit=4):
@@ -32,10 +31,9 @@ def letra(query,limit=4):
 
 def auto(query, limit=4):
     result = []
-    query = urllib.parse.quote(query)
     n = 0
     for i in googlesearch.search('site:letras.mus.br ' + query, num=30, pause=2):
-        if re.match(r'^(https?://)?(letras\.mus.br/|(m\.|www\.)?letras\.mus\.br/).+', i):
+        if re.match(r'^(https?://)?(letras\.mus.br/|(m\.|www\.)?letras\.mus\.br/).+', i) and not '/traducao.html' in i:
             try:
                 a = letra(i)
                 result.append(a)
