@@ -9,7 +9,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     url='https://github.com/amanoteam/LyricsPy',
     author='AmanoTeam',
-    install_requires=['requests', 'bs4', 'duckpy', 'markdownify'],
+    install_requires=['requests', 'bs4', 'google', 'markdownify'],
     author_email='contact@amanoteam.ml',
     description='search lyrics on letras.mus',
     long_description=long_desc,
