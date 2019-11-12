@@ -2,7 +2,9 @@ import requests
 from markdownify import markdownify as md
 from bs4 import BeautifulSoup
 import re
-import googlesearch
+import duckpy
+
+ddg = duckpy.Client()
 
 def letra(query,limit=4):
     tr = 'a'
@@ -32,7 +34,7 @@ def letra(query,limit=4):
 def auto(query, limit=4):
     result = []
     n = 0
-    for i in googlesearch.search('site:letras.mus.br ' + query, num=30, pause=2):
+    for i in ddg.search('site:letras.mus.br ' + query):
         if re.match(r'^(https?://)?(letras\.mus.br/|(m\.|www\.)?letras\.mus\.br/).+', i) and not '/traducao.html' in i:
             try:
                 a = letra(i)
