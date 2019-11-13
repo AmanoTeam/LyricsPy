@@ -40,7 +40,7 @@ def auto(query, limit=4):
                 a = letra(i)
                 result.append(a)
                 n += 1
-            except:
+            except AttributeError:
                 pass
         if n == limit:
             break
