@@ -1,10 +1,12 @@
-import requests
-from markdownify import markdownify as md
-from bs4 import BeautifulSoup
 import re
-import googlesearch
 
-def letra(query,limit=4):
+import googlesearch
+import requests
+from bs4 import BeautifulSoup
+from markdownify import markdownify as md
+
+
+def letra(query):
     tr = 'a'
     query = query.replace('www.letras', 'm.letras')
     r = requests.get(query)
@@ -19,12 +21,12 @@ def letra(query,limit=4):
     c = soup.find("div", "lyric-title g-1")
     musica = c.find('h1').get_text()
     autor = c.find('a').get_text()
-    ret = {'autor': autor, 'musica': musica, 'letra': b.replace('\n\n\n','\n\n'), 'link': r.url}
+    ret = {'autor': autor, 'musica': musica, 'letra': b.replace('\n\n\n', '\n\n'), 'link': r.url}
     if 'a' not in tr:
         b = ''
         for i in tr.find_all('p'):
             b += md(str(i))
-        ret['traducao'] = b.replace('\n\n\n','\n\n')
+        ret['traducao'] = b.replace('\n\n\n', '\n\n')
 
     return ret
 
@@ -33,7 +35,7 @@ def auto(query, limit=4):
     result = []
     n = 0
     for i in googlesearch.search('site:letras.mus.br ' + query, num=30, pause=5):
-        if re.match(r'^(https?://)?(letras\.mus.br/|(m\.|www\.)?letras\.mus\.br/).+', i) and not '/traducao.html' in i:
+        if re.match(r'^(https?://)?(letras\.mus.br/|(m\.|www\.)?letras\.mus\.br/).+', i) and '/traducao.html' not in i:
             try:
                 a = letra(i)
                 result.append(a)
