@@ -3,11 +3,11 @@ from bs4 import BeautifulSoup
 import re
 import urllib3
 
-def letra(query):
+def letra(query, **kwargs):
     tr = 'a'
     query = query.replace('www.letras', 'm.letras')
     http = urllib3.PoolManager()
-    r = http.request("get",query)
+    r = http.request("get",query, fields=dict(**kwargs))
     soup = BeautifulSoup(r.data, "html.parser")
     a = soup.find('div', "lyric-cnt g-1")
     if a is None:
@@ -58,5 +58,3 @@ def search(q, **kwargs):
         if item_text and item_href:
             a.append(item_href)
     return a
-
-print(auto('oi', limit=1))
