@@ -3,10 +3,11 @@ from bs4 import BeautifulSoup
 import re
 import urllib3
 
+http = urllib3.PoolManager()
+
 def letra(query, **kwargs):
     tr = 'a'
     query = query.replace('www.letras', 'm.letras')
-    http = urllib3.PoolManager()
     r = http.request("get",query, fields=dict(**kwargs))
     soup = BeautifulSoup(r.data, "html.parser")
     a = soup.find('div', "lyric-cnt g-1")
@@ -47,7 +48,6 @@ def auto(query, limit=4):
 
 def search(q, **kwargs):
     a = []
-    http = urllib3.PoolManager()
     rt = http.request("get","https://www.bing.com/search", fields=dict(q=q, **kwargs))
     soupt = BeautifulSoup(rt.data, "html.parser")
     results = soupt.find("ol", {"id":"b_results"})
