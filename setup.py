@@ -5,11 +5,11 @@ with open("README.md") as f:
 
 setuptools.setup(
     name='LyricsPy',
-    version='0.1.5',
+    version='0.1.7',
     packages=["lyricspy"],
     url='https://github.com/amanoteam/LyricsPy',
     author='AmanoTeam',
-    install_requires=['requests', 'bs4', 'google', 'markdownify'],
+    install_requires=['urllib3', 'bs4', 'markdownify'],
     author_email='contact@amanoteam.com',
     description='search lyrics on letras.mus.br',
     long_description=long_desc,
