@@ -1,21 +1,19 @@
 from bs4 import BeautifulSoup
-from seleniumrequestshtml import Chrome
-from selenium.webdriver.chrome.options import Options
+import urllib3
 import re
 
-options = Options()
-options.add_argument("--headless")
-webdriver = Chrome(chrome_options=options)
-session = webdriver.requests_session
+http = urllib3.PoolManager()
+
+headers = {'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'}
 
 def letra(query, **kwargs):
-    r = session.get(query)
-    data = r.html.html
-    return parse(data, r.url)
+    r = http.request('get',query, headers=headers)
+    data = r.data
+    return parse(data, query)
 
 def search(q):
-    r = session.get(f'https://www.musixmatch.com/pt-br/search/{q}')
-    data = r.html.html
+    r = http.request('get', f'https://www.musixmatch.com/pt-br/search/{q}', headers=headers)
+    data = r.data
     soup = BeautifulSoup(data, "html.parser")
     b = soup.find_all('li', {'class':'showArtist showCoverart'})
     res = []
@@ -28,7 +26,6 @@ def auto(query, limit=4):
     n = 0
     for i in search(query):
         if re.match(r'^(https?://)?(musixmatch\.com/|(m\.|www\.)?musixmatch\.com/).+', i) and not '/translation' in i and not '/artist' in i:
-            print(i)
             try:
                 a = letra(i)
                 result.append(a)
@@ -44,15 +41,13 @@ def parce_tr(url):
     if not '/' in url[-1]:
         url += '/'
     get = f'{url}traducao/portugues'
-    r = session.get(get)
-    data = r.html.html
+    r = http.request('get', get, headers=headers)
+    data = r.data
     soup = BeautifulSoup(data, "html.parser")
     b = soup.find_all('div', {'class':'mxm-translatable-line-readonly'})
     c = []
     for i in b:
         d = i.find_all('div', {'class':'col-xs-6 col-sm-6 col-md-6 col-ml-6 col-lg-6'})
-        print(d)
-        return d
         c.append(d[0].get_text())
     trad = '\n'.join([x for x in c])
     return trad
