@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import urllib3
+from urllib.parse import quote_plus
 import re
 
 http = urllib3.PoolManager()
@@ -24,7 +25,7 @@ def search(q):
 def auto(query, limit=4):
     result = []
     n = 0
-    for i in search(query):
+    for i in search(quote_plus(query)):
         if re.match(r'^(https?://)?(musixmatch\.com/|(m\.|www\.)?musixmatch\.com/).+', i) and not '/translation' in i and not '/artist' in i:
             try:
                 a = letra(i)
@@ -39,16 +40,22 @@ def auto(query, limit=4):
 
 def parce_tr(url):
     if not '/' in url[-1]:
-        url += '/'
+        url = url+'/'
     get = f'{url}traducao/portugues'
     r = http.request('get', get, headers=headers)
     data = r.data
     soup = BeautifulSoup(data, "html.parser")
+    x = soup.find_all('div', {'class':'col-xs-6 col-sm-6 col-md-6 col-ml-6 col-lg-6'})
+    n = 0
+    for i in x:
+        if i.get_text() == 'Tradução para Portugues':
+            break
+        n += 1
     b = soup.find_all('div', {'class':'mxm-translatable-line-readonly'})
     c = []
     for i in b:
         d = i.find_all('div', {'class':'col-xs-6 col-sm-6 col-md-6 col-ml-6 col-lg-6'})
-        c.append(d[0].get_text())
+        c.append(d[n].get_text())
     trad = '\n'.join([x for x in c])
     return trad
 
