@@ -117,7 +117,7 @@ class muximatch():
         b = ''
         x = soup.find_all('span', {'class':['lyrics__content__ok','lyrics__content__warning','lyrics__content__error']})
         musica = str(soup.find('h1', {'class': 'mxm-track-title__track'})).split('</small>')[1].replace('</h1>','')
-        ret = {'autor': autor.get_text(), 'musica': musica, 'link': url}
+        ret = {'autor': autor.get_text(), 'musica': musica, 'link': url, 'inst':False}
         for i in x:
             b += i.get_text()
         if b != '':
