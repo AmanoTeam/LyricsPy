@@ -90,7 +90,10 @@ class muximatch():
     
         return result
     
-    def parce_tr(self, get):
+    def parce_tr(self, url):
+        if not '/' in url[-1]:
+            url = url+'/'
+        get = f'{url}traducao/portugues'
         r = http.request('get', get, headers=headers)
         data = r.data
         soup = BeautifulSoup(data, "html.parser")
@@ -107,7 +110,7 @@ class muximatch():
             c.append(d[n].get_text())
         trad = '\n'.join([x for x in c])
         if x:
-            return {x[n].get_text().split(' ',2)[-1]:trad}
+            return trad, x[n].get_text().split(' ',2)[-1]
     
     def parse(self, data, url):
         soup = BeautifulSoup(data, "html.parser")
@@ -122,16 +125,6 @@ class muximatch():
             ret['letra'] = b
         else:
             ret['inst'] = True
-        g = soup.find('div', {'class':'mxm-translation-box'})
-        if g:
-            g = g.find_all('div', {'class':'cta-button'})
-            trs = {}
-            for i in g:
-                h = i.find('a').get('href')
-                if h:
-                    get = 'http://musixmatch.com' + h
-                    t = self.parce_tr(get)
-                    if t:
-                        trs.update(t)
-            ret['translations'] = trs
+        if soup.find('i', {'class':'translations flag br-flag'}):
+                ret['traducao'], ret['tr_name'] = self.parce_tr(url)
         return ret
