@@ -90,17 +90,14 @@ class muximatch():
     
         return result
     
-    def parce_tr(self, url):
-        if not '/' in url[-1]:
-            url = url+'/'
-        get = f'{url}traducao/portugues'
+    def parce_tr(self, get):
         r = http.request('get', get, headers=headers)
         data = r.data
         soup = BeautifulSoup(data, "html.parser")
         x = soup.find_all('div', {'class':'col-xs-6 col-sm-6 col-md-6 col-ml-6 col-lg-6'})
         n = 0
         for i in x:
-            if 'Tradução' in i.get_text():
+            if i.find('img'):
                 break
             n += 1
         b = soup.find_all('div', {'class':'mxm-translatable-line-readonly'})
@@ -109,7 +106,7 @@ class muximatch():
             d = i.find_all('div', {'class':'col-xs-6 col-sm-6 col-md-6 col-ml-6 col-lg-6'})
             c.append(d[n].get_text())
         trad = '\n'.join([x for x in c])
-        return trad, x[n].get_text()
+        return {x[n].get_text().split(' ',2)[-1]:trad}
     
     def parse(self, data, url):
         soup = BeautifulSoup(data, "html.parser")
@@ -124,6 +121,14 @@ class muximatch():
             ret['letra'] = b
         else:
             ret['inst'] = True
-        if soup.find('i', {'class':'translations flag br-flag'}):
-                ret['traducao'], ret['tr_name'] = self.parce_tr(url)
+        g = soup.find('div', {'class':'mxm-translation-box'})
+        if g:
+            g = g.find_all('div', {'class':'cta-button'})
+            trs = []
+            for i in g:
+                h = i.find('a').get('href')
+                if h:
+                    get = 'http://musixmatch.com' + h
+                    trs.append(self.parce_tr(get))
+            ret['translations'] = trs
         return ret
