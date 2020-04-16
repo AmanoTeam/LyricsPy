@@ -106,7 +106,8 @@ class muximatch():
             d = i.find_all('div', {'class':'col-xs-6 col-sm-6 col-md-6 col-ml-6 col-lg-6'})
             c.append(d[n].get_text())
         trad = '\n'.join([x for x in c])
-        return {x[n].get_text().split(' ',2)[-1]:trad}
+        if x:
+            return {x[n].get_text().split(' ',2)[-1]:trad}
     
     def parse(self, data, url):
         soup = BeautifulSoup(data, "html.parser")
@@ -124,11 +125,13 @@ class muximatch():
         g = soup.find('div', {'class':'mxm-translation-box'})
         if g:
             g = g.find_all('div', {'class':'cta-button'})
-            trs = []
+            trs = {}
             for i in g:
                 h = i.find('a').get('href')
                 if h:
                     get = 'http://musixmatch.com' + h
-                    trs.append(self.parce_tr(get))
+                    t = self.parce_tr(get)
+                    if t:
+                        trs.update(t)
             ret['translations'] = trs
         return ret
