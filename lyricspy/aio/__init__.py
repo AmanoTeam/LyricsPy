@@ -3,9 +3,32 @@ import aiohttp
 from urllib.parse import quote_plus
 import re
 import json
-from .. import parce_let, parce
+from .. import parce_let, parce, parce_gen
 
 headers = {'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'}
+
+class genius():
+    async def search(self, q, per_page=4):
+        async with aiohttp.ClientSession() as session:
+            r = await session.get("https://genius.com/api/search/multi?", params=dict(q=q, per_page=per_page))
+            a = await r.json()
+        hits =[hit['result'] for section in a['response']['sections'] for hit in section['hits'] if hit['index'] == 'lyric']
+        return hits
+
+    async def letra(self, url, remove):
+        async with aiohttp.ClientSession() as session:
+            r = await session.get(url)
+            data = await r.read()
+        ret = parce_gen(data, remove)
+        return ret
+
+    async def auto(self, q, limit=4, remove=True):
+        a = await self.search(q, per_page=limit)
+        ret = []
+        for i in a:
+            b = await self.letra(i['url'], remove)
+            ret.append(b)
+        return ret
 
 class letras():
     async def letra(self, query, **kwargs):

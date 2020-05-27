@@ -3,10 +3,39 @@ import urllib3
 from urllib.parse import quote_plus
 import re
 import json
+import requests
 
 http = urllib3.PoolManager()
 
 headers = {'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'}
+
+class genius():
+    def search(self, q, per_page=4):
+        r = requests.get("https://genius.com/api/search/multi?", params=dict(q=q, per_page=per_page))
+        a = r.json()
+        hits =[hit['result'] for section in a['response']['sections'] for hit in section['hits'] if hit['index'] == 'lyric']
+        return hits
+
+    def letra(self, url, remove):
+        r = requests.get(url)
+        ret = parce_gen(r.text, remove)
+        return ret
+
+    def auto(self, q, limit=4, remove=True):
+        a = self.search(q, per_page=limit)
+        for i in a:
+            b = self.letra(i['url'], remove)
+            return b
+        
+def parce_gen(data, remove):
+    soup = BeautifulSoup(data, "html.parser")
+    ret = soup.find("div", {'class':['lyrics', 'Lyrics__Container-sc-1ynbvzw-2 jgQsqn']}).get_text()
+    with open('a.html','w') as f:
+            f.write(str(ret))
+    if remove:
+        ret = re.sub('(\[.*?\])*', '', ret)
+        ret = re.sub('\n{2}', '\n', ret)
+    return ret.strip("\n")
 
 class letras():
     def letra(self, query, **kwargs):
