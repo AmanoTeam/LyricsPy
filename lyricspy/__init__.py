@@ -16,26 +16,38 @@ class genius():
         hits =[hit['result'] for section in a['response']['sections'] for hit in section['hits'] if hit['index'] == 'lyric']
         return hits
 
-    def letra(self, url, remove):
+    def letra(self, url, remove=True):
         r = requests.get(url)
-        ret = parce_gen(r.text, remove)
+        ret = parce_gen(r.text, url, remove)
         return ret
 
     def auto(self, q, limit=4, remove=True):
         a = self.search(q, per_page=limit)
+        reslts = []
         for i in a:
             b = self.letra(i['url'], remove)
-            return b
+            reslts.append(b)
+        return reslts
         
-def parce_gen(data, remove):
+def parce_gen(data, query, remove):
     soup = BeautifulSoup(data, "html.parser")
+    autor = soup.find('a', {'class':'Link-h3isu4-0 dpVWpH SongHeader__Artist-sc-1b7aqpg-8 DYpgM'})
+    if not autor:
+        autor = soup.find('h1', {'class':'header_with_cover_art-primary_info-title'})
+    print(autor)
+    autor = autor.get_text()
+    musica = soup.find('h1', {'class':'SongHeader__Title-sc-1b7aqpg-7'})
+    print(musica)
+    try:
+        musica = musica.get_text()
+    except:
+        pass
     ret = soup.find("div", {'class':['lyrics', 'Lyrics__Container-sc-1ynbvzw-2 jgQsqn']}).get_text()
-    with open('a.html','w') as f:
-            f.write(str(ret))
     if remove:
         ret = re.sub('(\[.*?\])*', '', ret)
         ret = re.sub('\n{2}', '\n', ret)
-    return ret.strip("\n")
+    ret = {'autor': autor, 'musica': musica, 'letra': ret.strip("\n"), 'link': query}
+    return ret
 
 class letras():
     def letra(self, query, **kwargs):
