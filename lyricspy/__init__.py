@@ -46,7 +46,7 @@ def parce_gen(data, query, remove):
     if remove:
         ret = re.sub('(\[.*?\])*', '', ret)
         ret = re.sub('\n{2}', '\n', ret)
-    ret = {'autor': autor.encode("latin-1").decode("utf-8"), 'musica': musica.encode("latin-1").decode("utf-8"), 'letra': ret.strip("\n").encode("latin-1").decode("utf-8"), 'link': query}
+    ret = {'autor': autor, 'musica': musica, 'letra': ret.strip("\n"), 'link': query}
     return ret
 
 class letras():
@@ -94,12 +94,12 @@ def parce_let(data, query):
     c = soup.find("div", "lyric-title g-1")
     musica = c.find('h1').get_text()
     autor = c.find('a').get_text()
-    ret = {'autor': autor.encode("latin-1").decode("utf-8"), 'musica': musica.encode("latin-1").decode("utf-8"), 'letra': b.replace('\n\n\n', '\n\n').encode("latin-1").decode("utf-8"), 'link': query}
+    ret = {'autor': autor, 'musica': musica, 'letra': b.replace('\n\n\n', '\n\n'), 'link': query}
     if 'a' not in tr:
         b = ''
         for i in tr.find_all('p'):
             b += i.get_text()
-        ret['traducao'] = b.replace('\n\n\n', '\n\n').encode("latin-1").decode("utf-8")
+        ret['traducao'] = b.replace('\n\n\n', '\n\n')
     return ret
     
 def parce_tr(url):
@@ -122,7 +122,7 @@ def parce_tr(url):
         c.append(d[n].get_text())
     trad = '\n'.join([x for x in c])
     if x:
-        return trad.encode("latin-1").decode("utf-8"), x[n].get_text().split(' ',2)[-1].encode("latin-1").decode("utf-8")
+        return trad, x[n].get_text().split(' ',2)[-1]
     
 def parce(data, url):
     soup = BeautifulSoup(data, "html.parser")
@@ -130,7 +130,7 @@ def parce(data, url):
     b = ''
     x = soup.find_all('span', {'class':['lyrics__content__ok','lyrics__content__warning','lyrics__content__error']})
     musica = str(soup.find('h1', {'class': 'mxm-track-title__track'})).split('</small>')[1].replace('</h1>','')
-    ret = {'autor': autor.get_text().encode("latin-1").decode("utf-8"), 'musica': musica.encode("latin-1").decode("utf-8"), 'link': url, 'inst':False}
+    ret = {'autor': autor.get_text(), 'musica': musica, 'link': url, 'inst':False}
     for i in x:
         b += i.get_text()
     if b != '':
