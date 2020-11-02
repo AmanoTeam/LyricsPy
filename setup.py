@@ -9,7 +9,7 @@ setuptools.setup(
     packages=["lyricspy", "lyricspy.aio"],
     url='https://github.com/amanoteam/LyricsPy',
     author='AmanoTeam',
-    install_requires=['urllib3', 'bs4'],
+    install_requires=['urllib3', 'beautifulsoup4', 'aiohttp'],
     author_email='contact@amanoteam.com',
     description='search lyrics on musixmatch.com',
     long_description=long_desc,
