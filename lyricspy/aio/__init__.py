@@ -1,25 +1,32 @@
-from bs4 import BeautifulSoup
-import aiohttp
-from urllib.parse import quote_plus
+import asyncio
 import re
-import json
-from .. import parce_let, parce, parce_gen
+from urllib.parse import quote_plus
 
-headers = {'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'}
+import httpx
+from bs4 import BeautifulSoup
 
-class genius():
-    async def search(self, q, per_page=4):
-        async with aiohttp.ClientSession() as session:
-            r = await session.get("https://genius.com/api/search/multi?", params=dict(q=q, per_page=per_page))
-            a = await r.json()
-        hits =[hit['result'] for section in a['response']['sections'] for hit in section['hits'] if hit['index'] == 'lyric']
+from .. import parse_let, parse, parse_gen, headers
+
+
+http = httpx.AsyncClient(http2=True)
+
+loop = asyncio.get_event_loop()
+
+
+class Genius:
+    @staticmethod
+    async def search(q, per_page=4):
+        r = await http.get("https://genius.com/api/search/multi?", params=dict(q=q, per_page=per_page))
+        a = r.json()
+        hits = [hit['result'] for section in a['response']['sections'] for hit in section['hits'] if
+                hit['index'] == 'lyric']
         return hits
 
-    async def letra(self, url, remove):
-        async with aiohttp.ClientSession() as session:
-            r = await session.get(url)
-            data = await r.read()
-        ret = parce_gen(data, remove)
+    @staticmethod
+    async def letra(url, remove):
+        r = await http.get(url)
+        data = r.read()
+        ret = await loop.run_in_executor(None, parse_gen, data, url, remove)
         return ret
 
     async def auto(self, q, limit=4, remove=True):
@@ -30,16 +37,16 @@ class genius():
             ret.append(b)
         return ret
 
-class letras():
-    async def letra(self, query, **kwargs):
+
+class Letras:
+    @staticmethod
+    async def letra(query, **kwargs):
         query = query.replace('www.letras', 'm.letras')
-        async with aiohttp.ClientSession() as session:
-            r = await session.get(query, params=dict(**kwargs))
-            data = await r.read()
-        ret = parce_let(data, query)
+        r = await http.get(query, params=dict(**kwargs))
+        data = r.read()
+        ret = await loop.run_in_executor(None, parse_let, data, query)
         return ret
-    
-    
+
     async def auto(self, query, limit=4):
         result = []
         n = 0
@@ -50,13 +57,13 @@ class letras():
             n += 1
             if n == limit:
                 break
-    
+
         return result
 
-    async def search(self, query):
-        async with aiohttp.ClientSession() as session:
-            r = await session.get('https://studiosolsolr-a.akamaihd.net/letras/app2/', params=dict(q=query))
-            a = json.loads(await r.read())
+    @staticmethod
+    async def search(query):
+        r = await http.get('https://studiosolsolr-a.akamaihd.net/letras/app2/', params=dict(q=query))
+        a = r.json()
         x = []
         n = 0
         for i in a['highlighting']:
@@ -65,31 +72,32 @@ class letras():
                 x.append(f"https://www.letras.mus.br/{g['dns']}/{g['url']}")
             n += 1
         return x
-    
-class muximatch():
-    async def letra(self, query, **kwargs):
-        async with aiohttp.ClientSession() as session:
-            r = await session.get(query, headers=headers)
-            data = await r.read()
-        return parce(data, query)
-    
-    async def search(self, q):
-        async with aiohttp.ClientSession() as session:
-            r = await session.get(f'https://www.musixmatch.com/pt-br/search/{q}', headers=headers)
-            data = await r.read()
+
+
+class Musixmatch:
+    @staticmethod
+    async def letra(query):
+        r = await http.get(query, headers=headers)
+        data = r.read()
+        return await loop.run_in_executor(None, parse, data, query)
+
+    @staticmethod
+    async def search(q):
+        r = await http.get(f'https://www.musixmatch.com/pt-br/search/{q}', headers=headers)
+        data = r.read()
         soup = BeautifulSoup(data, "html.parser")
-        b = soup.find_all('li', {'class':'showArtist showCoverart'})
+        b = soup.find_all('li', {'class': 'showArtist showCoverart'})
         res = []
         for i in b[1:]:
-            res.append('https://www.musixmatch.com'+i.find('a',{'class':'title'}).get('href'))
+            res.append('https://www.musixmatch.com' + i.find('a', {'class': 'title'}).get('href'))
         return res
-    
+
     async def auto(self, query, limit=4):
         result = []
         n = 0
         r = await self.search(quote_plus(query))
         for i in r:
-            if re.match(r'^(https?://)?(musixmatch\.com/|(m\.|www\.)?musixmatch\.com/).+', i) and not '/translation' in i and not '/artist' in i:
+            if re.match(r'^(https?://)?(musixmatch\.com/|(m\.|www\.)?musixmatch\.com/).+', i) and '/translation' not in i and '/artist' not in i:
                 try:
                     a = await self.letra(i)
                     result.append(a)
@@ -98,5 +106,11 @@ class muximatch():
                     pass
                 if n == limit:
                     break
-    
+
         return result
+
+
+# For compat
+muximatch = Musixmatch
+genius = Genius
+letras = Letras
