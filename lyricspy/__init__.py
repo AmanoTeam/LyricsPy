@@ -137,13 +137,11 @@ def parse_tr(url):
 def parse(data, url):
     soup = BeautifulSoup(data, "html.parser")
     autor = soup.find('a', {'class': 'mxm-track-title__artist mxm-track-title__artist-link'})
-    b = ''
     x = soup.find_all('span', {'class': ['lyrics__content__ok', 'lyrics__content__warning', 'lyrics__content__error']})
     musica = str(soup.find('h1', {'class': 'mxm-track-title__track'})).split('</small>')[1].replace('</h1>', '')
     ret = {'autor': autor.get_text(), 'musica': musica, 'link': url, 'inst': False}
-    for i in x:
-        b += i.get_text()
-    if b != '':
+    b = "\n".join([i.get_text() for i in x])
+    if b:
         ret['letra'] = b
     else:
         ret['inst'] = True
