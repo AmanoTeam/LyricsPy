@@ -3,33 +3,32 @@
   <h5 align="center">A library to search for music lyrics.</h5>
 </h6>
 
-
-## Installation:
+## Installation
 
 LyricsPy can be installed using pip from PyPI or from GitHub
 
-#### via PyPI using pip:
+#### via PyPI using pip
 
 ```bash
 pip install -U lyricspy
 ```
 
-#### via GitHub using pip+git:
+#### via GitHub using pip+git
 
 ```bash
 pip install -U git+https://github.com/AmanoTeam/LyricsPy
 ```
 
-## Usage:
+## Usage
 
-To use LyricsPY is easy, but let's see some examples:
+To use LyricsPy is easy, but let's see some examples:
 
-### First example:
+### Musixmatch example
 
 ```python
-import lyricspy
+from lyricspy import Musixmatch
 
-search = lyricspy.auto("Hello")[0]
+search = Musixmatch().auto("Hello", limit=1)[0]
 
 # Print author name
 print(search["autor"])
