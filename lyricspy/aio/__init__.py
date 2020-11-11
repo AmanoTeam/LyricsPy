@@ -25,7 +25,7 @@ class Genius:
     @staticmethod
     async def letra(url, remove):
         r = await http.get(url)
-        data = r.read()
+        data = r.text
         ret = await loop.run_in_executor(None, parse_gen, data, url, remove)
         return ret
 
@@ -43,7 +43,7 @@ class Letras:
     async def letra(query, **kwargs):
         query = query.replace('www.letras', 'm.letras')
         r = await http.get(query, params=dict(**kwargs))
-        data = r.read()
+        data = r.text
         ret = await loop.run_in_executor(None, parse_let, data, query)
         return ret
 
@@ -78,13 +78,13 @@ class Musixmatch:
     @staticmethod
     async def letra(query):
         r = await http.get(query, headers=headers)
-        data = r.read()
+        data = r.text
         return await loop.run_in_executor(None, parse, data, query)
 
     @staticmethod
     async def search(q):
         r = await http.get(f'https://www.musixmatch.com/pt-br/search/{q}', headers=headers)
-        data = r.read()
+        data = r.text
         soup = BeautifulSoup(data, "html.parser")
         b = soup.find_all('li', {'class': 'showArtist showCoverart'})
         res = []

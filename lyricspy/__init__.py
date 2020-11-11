@@ -116,7 +116,7 @@ def parse_tr(url):
         url = url + '/'
     get = f'{url}traducao/portugues'
     r = http.get(get, headers=headers)
-    data = r.read()
+    data = r.text
     soup = BeautifulSoup(data, "html.parser")
     x = soup.find_all('div', {'class': 'col-xs-6 col-sm-6 col-md-6 col-ml-6 col-lg-6'})
     n = 0
@@ -156,13 +156,13 @@ class Musixmatch:
     @staticmethod
     def letra(query):
         r = http.get(query, headers=headers)
-        data = r.read()
+        data = r.text
         return parse(data, query)
 
     @staticmethod
     def search(q):
         r = http.get(f'https://www.musixmatch.com/pt-br/search/{q}', headers=headers)
-        data = r.read()
+        data = r.text
         soup = BeautifulSoup(data, "html.parser")
         b = soup.find_all('li', {'class': 'showArtist showCoverart'})
         res = []
