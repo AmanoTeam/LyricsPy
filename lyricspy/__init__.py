@@ -90,24 +90,23 @@ class Letras:
 
 
 def parse_let(data, query):
-    tr = 'a'
+    tr = None
     soup = BeautifulSoup(data, "html.parser")
+    for br in soup.find_all("br"):
+        br.replace_with("\n")
     a = soup.find('div', "lyric-cnt g-1")
+    # Songs with translation
     if a is None:
         a = soup.find('div', "lyric-tra_l")
         tr = soup.find('div', "lyric-tra_r")
-    b = ''
-    for i in a.find_all('p'):
-        b += i.get_text()
+    b = "\n\n".join(i.get_text() for i in a.find_all('p'))
     c = soup.find("div", "lyric-title g-1")
     musica = c.find('h1').get_text()
     autor = c.find('a').get_text()
-    ret = {'autor': autor, 'musica': musica, 'letra': b.replace('\n\n\n', '\n\n'), 'link': query}
-    if 'a' not in tr:
-        b = ''
-        for i in tr.find_all('p'):
-            b += i.get_text()
-        ret['traducao'] = b.replace('\n\n\n', '\n\n')
+    ret = {'autor': autor, 'musica': musica, 'letra': b, 'link': query}
+    if tr is not None:
+        b = "\n\n".join(i.get_text() for i in a.find_all('p'))
+        ret['traducao'] = b
     return ret
 
 
