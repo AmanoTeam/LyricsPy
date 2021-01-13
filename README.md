@@ -27,15 +27,10 @@ To use LyricsPy is easy, but let's see some examples:
 
 ```python
 from lyricspy import Musixmatch
+from json import dump
 
-search = Musixmatch().auto("Hello", limit=1)[0]
+search = Musixmatch("Musixmatch key").auto("Hello",lang="pt" , limit=1)
 
-# Print author name
-print(search["autor"])
-
-# Print music title
-print(search["musica"])
-
-# Print music lyrics
-print(search["letra"])
+with open("lyrics.json", "w") as f:
+  dump(search, f)
 ```
