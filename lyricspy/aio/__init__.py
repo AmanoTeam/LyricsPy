@@ -56,7 +56,6 @@ class Musixmatch:
             id = i['track']['track_id'] if 'track' in i else i['id']
             b = await self.lyrics(id)
             letra = b['message']['body']['macro_calls']['track.lyrics.get']['message']['body']['lyrics']['lyrics_body']
-            l = {'letra':letra}
             c = await self.translation(id, lang)
             tr = letra
             for i in c['message']['body']['translations_list']:
@@ -71,7 +70,7 @@ class Musixmatch:
         musica = q['message']['body']['macro_calls']['matcher.track.get']['message']['body']['track']['track_name']
         letra = q['message']['body']['macro_calls']['track.lyrics.get']['message']['body']['lyrics']['lyrics_body']
         link = q['message']['body']['macro_calls']['track.lyrics.get']['message']['body']['lyrics']['backlink_url'].split('?')[0]
-        traducao = q['translate']
+        traducao = q['translate'] if 'translate' in q else None
         id = q['message']['body']['macro_calls']['matcher.track.get']['message']['body']['track']['track_id']
         ret = {'autor': autor, 'musica': musica, 'letra': letra, 'link': link, 'traducao':traducao, 'id':id}
         return ret
@@ -93,9 +92,6 @@ class Letras:
             a = soup.find('div', "lyric-tra_l")
             tr = soup.find('div', "lyric-tra_r")
         b = "\n\n".join(i.get_text() for i in a.find_all('p'))
-        c = soup.find("div", "lyric-title g-1")
-        musica = c.find('h1').get_text()
-        autor = c.find('a').get_text()
         query.update({'letra': b})
         if tr is not None:
             b = "\n\n".join(i.get_text() for i in a.find_all('p'))
