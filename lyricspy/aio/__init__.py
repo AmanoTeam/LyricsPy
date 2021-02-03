@@ -2,6 +2,9 @@ import random
 import re
 
 import httpx
+from bs4 import BeautifulSoup
+
+from asyncio import get_event_loop
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.37'}
@@ -63,3 +66,52 @@ class Musixmatch:
             ret.append(b)
         return ret
 
+class Letras:
+    def __init__(self):
+        self.http = httpx.AsyncClient(http2=True)
+
+    async def letra(self, query, **kwargs):
+        link = query['link'].replace('www.letras', 'm.letras')
+        r = await self.http.get(link, params=dict(**kwargs))
+        tr = None
+        soup = BeautifulSoup(r.text, "html.parser")
+        for br in soup.find_all("br"):
+            br.replace_with("\n")
+        a = soup.find('div', "lyric-cnt g-1")
+        # Songs with translation
+        if a is None:
+            a = soup.find('div', "lyric-tra_l")
+            tr = soup.find('div', "lyric-tra_r")
+        b = "\n\n".join(i.get_text() for i in a.find_all('p'))
+        c = soup.find("div", "lyric-title g-1")
+        musica = c.find('h1').get_text()
+        autor = c.find('a').get_text()
+        query.update({'letra': b})
+        if tr is not None:
+            b = "\n\n".join(i.get_text() for i in a.find_all('p'))
+            query.update({'traducao':b})
+        return query
+
+    async def search(self, query):
+        r = await self.http.get('https://studiosolsolr-a.akamaihd.net/letras/app2/', params=dict(q=query))
+        a = r.json()
+        x = []
+        n = 0
+        for i in a['highlighting']:
+            if 'mus' in i:
+                g = a['response']['docs'][n]
+                g.update({'link':f"https://www.letras.mus.br/{g['dns']}/{g['url']}"})
+                x.append(g)
+            n += 1
+        return x
+
+    async def auto(self, query, limit=4):
+        result = []
+        n = 0
+        for i in await self.search(query):
+            a = await self.letra(i)
+            result.append(a)
+            n += 1
+            if n == limit:
+                break
+        return result
