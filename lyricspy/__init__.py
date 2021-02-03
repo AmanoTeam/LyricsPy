@@ -65,6 +65,16 @@ class Musixmatch:
             ret.append(b)
         return ret
 
+    def parce(self, q):
+        autor = q['message']['body']['macro_calls']['matcher.track.get']['message']['body']['track']['artist_name']
+        musica = q['message']['body']['macro_calls']['matcher.track.get']['message']['body']['track']['track_name']
+        letra = q['message']['body']['macro_calls']['track.lyrics.get']['message']['body']['lyrics']['lyrics_body']
+        link = q['message']['body']['macro_calls']['track.lyrics.get']['message']['body']['lyrics']['backlink_url'].split('?')[0]
+        traducao = q['translate']
+        id = q['message']['body']['macro_calls']['matcher.track.get']['message']['body']['track']['track_id']
+        ret = {'autor': autor, 'musica': musica, 'letra': letra, 'link': link, 'traducao':traducao, 'id':id}
+        return ret
+
 class Letras:
     def __init__(self):
         self.http = httpx.Client(http2=True)
@@ -89,6 +99,8 @@ class Letras:
         if tr is not None:
             b = "\n\n".join(i.get_text() for i in a.find_all('p'))
             query.update({'traducao':b})
+        else:
+            query.update({'traducao':None})
         return query
 
     def search(self, query):
@@ -114,3 +126,13 @@ class Letras:
             if n == limit:
                 break
         return result
+
+    def parce(self, q):
+        autor = q['art']
+        musica = q['txt']
+        letra = q['letra']
+        link = q['link']
+        traducao = q['traducao']
+        id = q['id']
+        ret = {'autor': autor, 'musica': musica, 'letra': letra, 'link': link, 'traducao':traducao, 'id':id}
+        return ret
