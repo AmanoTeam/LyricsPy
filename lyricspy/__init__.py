@@ -1,5 +1,6 @@
 import random
 import re
+from typing import Union
 
 import httpx
 from bs4 import BeautifulSoup
@@ -7,7 +8,7 @@ from bs4 import BeautifulSoup
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.37'}
 class Musixmatch:
-    def __init__(self, usertoken:[str, list]):
+    def __init__(self, usertoken:Union[str, list]):
         self.token = usertoken
         self.http = httpx.Client(http2=True)
 
@@ -23,11 +24,13 @@ class Musixmatch:
         ), headers=headers)
         return a.json()
 
-    def lyrics(self, id):
+    def lyrics(self, id=None, artist=None, track=None):
         utoken = random.choice(self.token) if type(self.token) is list else self.token
         a = self.http.get('https://apic.musixmatch.com/ws/1.1/macro.subtitles.get', params=dict(
             app_id='android-player-v1.0',
             usertoken=utoken,
+            q_artist=artist,
+            q_track=track,
             track_id=id,
             format='json'
         ), headers=headers)
