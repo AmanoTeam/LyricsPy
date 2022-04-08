@@ -33,7 +33,7 @@ class Musixmatch:
             q_track=track,
             track_id=id,
             format='json'
-        ), headers=headers)
+        ), headers=headers, follow_redirects=True)
 
         return a.json()
 
