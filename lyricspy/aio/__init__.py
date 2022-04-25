@@ -39,7 +39,7 @@ class Musixmatch:
 
         return a.json()
 
-    async def translation(self, id, lang):
+    async def translation(self, id, lang, letra=None):
         utoken = random.choice(self.token) if type(self.token) is list else self.token
         a = await self.http.get('https://apic.musixmatch.com/ws/1.1/crowd.track.translations.get', params=dict(
             app_id='android-player-v1.0',
@@ -49,7 +49,21 @@ class Musixmatch:
             part='user',
             format='json'
         ), headers=headers)
-        return a.json()
+        
+        with open('traducao.json', 'w') as f:
+            f.write(str(a.json()))
+        c = a.json()
+        if c['message']['body']['translations_list'] and letra:
+            tr = letra
+            for i in c['message']['body']['translations_list']:
+                escape = re.escape(i['translation']['snippet'])
+                tr = re.sub(f'^{escape}$', i['translation']['description'], tr, flags=re.M)
+        elif c['message']['body']['translations_list']:
+            tr = True
+        else:
+            tr = None
+        
+        return tr
 
     async def auto(self, q, lang, limit=5):
         a = await self.search(q, limit)
@@ -59,12 +73,8 @@ class Musixmatch:
             id = i['track']['track_id'] if 'track' in i else i['id']
             b = await self.lyrics(id)
             letra = b['message']['body']['macro_calls']['track.lyrics.get']['message']['body']['lyrics']['lyrics_body']
-            c = await self.translation(id, lang)
-            tr = letra
-            for i in c['message']['body']['translations_list']:
-                escape = re.escape(i['translation']['snippet'])
-                tr = re.sub(f'^{escape}$', i['translation']['description'], tr, flags=re.M)
-            b['translate'] = tr
+            c = await self.translation(id, lang, letra)
+            b['translate'] = c
             ret.append(b)
         return ret
 
