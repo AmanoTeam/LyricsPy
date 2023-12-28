@@ -6,10 +6,10 @@ with open("README.md") as f:
 setuptools.setup(
     name='LyricsPy',
     version='2.1.1',
-    packages=["lyricspy", "lyricspy.aio"],
+    packages=["lyricspy"],
     url='https://github.com/amanoteam/LyricsPy',
     author='Amano Team',
-    install_requires=['httpx'],
+    install_requires=['httpx', 'beautifulsoup4'],
     author_email='contact@amanoteam.com',
     description='search lyrics on musixmatch.com',
     long_description=long_desc,
