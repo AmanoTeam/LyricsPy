@@ -76,7 +76,7 @@ class Musixmatch:
             ret.append(b)
         return ret
 
-    def parce(self, q):
+    def parse(self, q):
         autor = q['message']['body']['macro_calls']['matcher.track.get']['message']['body']['track']['artist_name']
         musica = q['message']['body']['macro_calls']['matcher.track.get']['message']['body']['track']['track_name']
         letra = q['message']['body']['macro_calls']['track.lyrics.get']['message']['body']['lyrics']['lyrics_body']
@@ -135,7 +135,7 @@ class Letras:
                 break
         return result
 
-    def parce(self, q):
+    def parse(self, q):
         autor = q['art']
         musica = q['txt']
         letra = q['letra']
