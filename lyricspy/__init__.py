@@ -10,11 +10,11 @@ headers = {
 class Musixmatch:
     def __init__(self, usertoken:Union[str, list]):
         self.token = usertoken
-        self.http = httpx.Client(http2=True)
+        self.http = httpx.AsyncClient(http2=True)
 
-    def search(self, q, limit):
+    async def search(self, q, limit):
         utoken = random.choice(self.token) if type(self.token) is list else self.token
-        a = self.http.get('https://apic.musixmatch.com/ws/1.1/macro.search', params=dict(
+        a = await self.http.get('https://apic.musixmatch.com/ws/1.1/macro.search', params=dict(
             app_id='android-player-v1.0',
             usertoken=utoken,
             q=q,
@@ -24,9 +24,9 @@ class Musixmatch:
         ), headers=headers)
         return a.json()
 
-    def lyrics(self, id=None, artist=None, track=None):
+    async def lyrics(self, id=None, artist=None, track=None):
         utoken = random.choice(self.token) if type(self.token) is list else self.token
-        a = self.http.get('https://apic.musixmatch.com/ws/1.1/macro.subtitles.get', params=dict(
+        a = await self.http.get('https://apic.musixmatch.com/ws/1.1/macro.subtitles.get', params=dict(
             app_id='android-player-v1.0',
             usertoken=utoken,
             q_artist=artist,
@@ -37,9 +37,9 @@ class Musixmatch:
 
         return a.json()
 
-    def translation(self, id, lang):
+    async def translation(self, id, lang, letra=None):
         utoken = random.choice(self.token) if type(self.token) is list else self.token
-        a = self.http.get('https://apic.musixmatch.com/ws/1.1/crowd.track.translations.get', params=dict(
+        a = await self.http.get('https://apic.musixmatch.com/ws/1.1/crowd.track.translations.get', params=dict(
             app_id='android-player-v1.0',
             usertoken=utoken,
             selected_language=lang,
@@ -47,23 +47,32 @@ class Musixmatch:
             part='user',
             format='json'
         ), headers=headers)
-        return a.json()
 
-    def auto(self, q, lang, limit=5):
-        print(limit)
-        a = self.search(q, limit)
-        res = a['message']['body']['macro_result_list']['track_list'] if limit != 1 else [a['message']['body']['macro_result_list']['best_match']]
-        ret = []
-        for i in res:
-            id = i['track']['track_id'] if 'track' in i else i['id']
-            b = self.lyrics(id)
-            letra = b['message']['body']['macro_calls']['track.lyrics.get']['message']['body']['lyrics']['lyrics_body']
-            c = self.translation(id, lang)
+        with open('traducao.json', 'w') as f:
+            f.write(str(a.json()))
+        c = a.json()
+        if c['message']['body']['translations_list'] and letra:
             tr = letra
             for i in c['message']['body']['translations_list']:
                 escape = re.escape(i['translation']['snippet'])
                 tr = re.sub(f'^{escape}$', i['translation']['description'], tr, flags=re.M)
-            b['translate'] = tr
+        elif c['message']['body']['translations_list']:
+            tr = True
+        else:
+            tr = None
+
+        return tr
+
+    async def auto(self, q, lang, limit=5):
+        a = await self.search(q, limit)
+        res = a['message']['body']['macro_result_list']['track_list'] if limit != 1 else [a['message']['body']['macro_result_list']['best_match']]
+        ret = []
+        for i in res:
+            id = i['track']['track_id'] if 'track' in i else i['id']
+            b = await self.lyrics(id)
+            letra = b['message']['body']['macro_calls']['track.lyrics.get']['message']['body']['lyrics']['lyrics_body']
+            c = await self.translation(id, lang, letra)
+            b['translate'] = c
             ret.append(b)
         return ret
 
@@ -79,11 +88,11 @@ class Musixmatch:
 
 class Letras:
     def __init__(self):
-        self.http = httpx.Client(http2=True)
+        self.http = httpx.AsyncClient(http2=True)
 
-    def letra(self, query, **kwargs):
+    async def letra(self, query, **kwargs):
         link = query['link'].replace('www.letras', 'm.letras')
-        r = self.http.get(link, params=dict(**kwargs))
+        r = await self.http.get(link, params=dict(**kwargs))
         tr = None
         soup = BeautifulSoup(r.text, "html.parser")
         for br in soup.find_all("br"):
@@ -102,8 +111,8 @@ class Letras:
             query.update({'traducao':None})
         return query
 
-    def search(self, query):
-        r = self.http.get('https://studiosolsolr-a.akamaihd.net/letras/app2/', params=dict(q=query))
+    async def search(self, query):
+        r = await self.http.get('https://studiosolsolr-a.akamaihd.net/letras/app2/', params=dict(q=query))
         a = r.json()
         x = []
         n = 0
@@ -115,11 +124,11 @@ class Letras:
             n += 1
         return x
 
-    def auto(self, query, limit=4):
+    async def auto(self, query, limit=4):
         result = []
         n = 0
-        for i in self.search(query):
-            a = self.letra(i)
+        for i in await self.search(query):
+            a = await self.letra(i)
             result.append(a)
             n += 1
             if n == limit:
