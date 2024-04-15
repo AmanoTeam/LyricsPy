@@ -26,14 +26,24 @@ class Musixmatch:
         ), headers=headers)
         return a.json()
 
-    async def lyrics(self, id=None, artist=None, track=None):
+    async def lyrics(self, id):
+        utoken = random.choice(self.token) if type(self.token) is list else self.token
+        a = await self.http.get('https://apic.musixmatch.com/ws/1.1/macro.subtitles.get', params=dict(
+            app_id='android-player-v1.0',
+            usertoken=utoken,
+            track_id=id,
+            format='json'
+        ), headers=headers, follow_redirects=True)
+
+        return a.json()
+    
+    async def spotify_lyrics(self, artist, track):
         utoken = random.choice(self.token) if type(self.token) is list else self.token
         a = await self.http.get('https://apic.musixmatch.com/ws/1.1/macro.subtitles.get', params=dict(
             app_id='android-player-v1.0',
             usertoken=utoken,
             q_artist=artist,
             q_track=track,
-            track_id=id,
             format='json'
         ), headers=headers, follow_redirects=True)
 
