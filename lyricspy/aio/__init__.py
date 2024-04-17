@@ -59,9 +59,7 @@ class Musixmatch:
             part='user',
             format='json'
         ), headers=headers)
-        
-        with open('traducao.json', 'w') as f:
-            f.write(str(a.json()))
+        print(a.url)
         c = a.json()
         if c['message']['body']['translations_list'] and letra:
             tr = letra
