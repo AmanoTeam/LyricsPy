@@ -5,7 +5,7 @@ with open("README.md") as f:
 
 setuptools.setup(
     name='LyricsPy',
-    version='2.1.0',
+    version='2.1.1',
     packages=["lyricspy", "lyricspy.aio"],
     url='https://github.com/amanoteam/LyricsPy',
     author='Amano Team',

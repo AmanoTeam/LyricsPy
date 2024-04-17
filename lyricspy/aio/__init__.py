@@ -75,12 +75,17 @@ class Musixmatch:
         
         return tr
 
-    async def auto(self, q, lang, limit=5):
-        a = await self.search(q, limit)
-        res = a['message']['body']['macro_result_list']['track_list'] if limit != 1 else [a['message']['body']['macro_result_list']['best_match']]
+    async def auto(self, q=None, lang="pt", limit=5, id=None):
+        print("auto", q, lang, limit, id)
+        if q:
+            a = await self.search(q, limit)
+            res = a['message']['body']['macro_result_list']['track_list'] if limit != 1 else [a['message']['body']['macro_result_list']['best_match']]
+        else:
+            res = [id]
         ret = []
         for i in res:
-            id = i['track']['track_id'] if 'track' in i else i['id']
+            if not id:
+                id = i['track']['track_id'] if 'track' in i else i['id']
             b = await self.lyrics(id)
             letra = b['message']['body']['macro_calls']['track.lyrics.get']['message']['body']['lyrics']['lyrics_body']
             c = await self.translation(id, lang, letra)
