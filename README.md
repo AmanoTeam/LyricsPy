@@ -1,5 +1,5 @@
 <h6 align="center">
-  <img src="https://piics.ml/i/011.png" alt="LyricsPy" height="250px">
+  <img src="https://raw.githubusercontent.com/edubr029/piics/master/i/011.png" alt="LyricsPy" height="250px">
   <h5 align="center">A library for searching music lyrics.</h5>
 </h6>
 
