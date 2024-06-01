@@ -49,7 +49,8 @@ class Letras:
                 break
         return result
 
-    def parse(self, query):
+    @staticmethod
+    def parse(query):
         autor = query["art"]
         musica = query["txt"]
         letra = query["letra"]

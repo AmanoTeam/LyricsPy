@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import random
 import re
-from typing import Union
 
 import httpx
 
@@ -10,7 +11,7 @@ headers = {
 
 
 class Musixmatch:
-    def __init__(self, usertoken: Union[str, list]):
+    def __init__(self, usertoken: str | list):
         self.token = usertoken
         self.http = httpx.AsyncClient(http2=True)
 
@@ -85,7 +86,7 @@ class Musixmatch:
             tr = letra
             for i in c["message"]["body"]["translations_list"]:
                 escape = re.escape(i["translation"]["snippet"])
-                tr = re.sub(f"^{escape}$", i["translation"]["description"], tr, flags=re.M)
+                tr = re.sub(f"^{escape}$", i["translation"]["description"], tr, flags=re.MULTILINE)
         elif c["message"]["body"]["translations_list"]:
             tr = True
         else:
@@ -117,7 +118,8 @@ class Musixmatch:
             ret.append(b)
         return ret
 
-    def parse(self, query):
+    @staticmethod
+    def parse(query):
         autor = query["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"][
             "track"
         ]["artist_name"]
@@ -131,9 +133,9 @@ class Musixmatch:
             "lyrics"
         ]["backlink_url"].split("?")[0]
         traducao = query.get("translate", None)
-        id = query["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"]["track"][
-            "track_id"
-        ]
+        id = query["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"][
+            "track"
+        ]["track_id"]
         return {
             "autor": autor,
             "musica": musica,
