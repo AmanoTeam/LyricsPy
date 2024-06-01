@@ -49,13 +49,13 @@ class Letras:
                 break
         return result
 
-    def parse(self, q):
-        autor = q["art"]
-        musica = q["txt"]
-        letra = q["letra"]
-        link = q["link"]
-        traducao = q["traducao"]
-        id = q["id"]
+    def parse(self, query):
+        autor = query["art"]
+        musica = query["txt"]
+        letra = query["letra"]
+        link = query["link"]
+        traducao = query["traducao"]
+        id = query["id"]
         return {
             "autor": autor,
             "musica": musica,

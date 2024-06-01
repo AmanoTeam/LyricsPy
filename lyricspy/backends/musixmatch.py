@@ -14,14 +14,15 @@ class Musixmatch:
         self.token = usertoken
         self.http = httpx.AsyncClient(http2=True)
 
-    async def search(self, q, limit):
-        utoken = random.choice(self.token) if type(self.token) is list else self.token
+    async def search(self, query: str, limit: int):
+        utoken = random.choice(self.token) if isinstance(self.token, list) else self.token
+
         a = await self.http.get(
             "https://apic.musixmatch.com/ws/1.1/macro.search",
             params={
                 "app_id": "android-player-v1.0",
                 "usertoken": utoken,
-                "q": q,
+                "q": query,
                 "page": 0,
                 "page_size": limit + 1,
                 "format": "json",
@@ -31,7 +32,8 @@ class Musixmatch:
         return a.json()
 
     async def lyrics(self, id):
-        utoken = random.choice(self.token) if type(self.token) is list else self.token
+        utoken = random.choice(self.token) if isinstance(self.token, list) else self.token
+
         a = await self.http.get(
             "https://apic.musixmatch.com/ws/1.1/macro.subtitles.get",
             params={
@@ -46,8 +48,8 @@ class Musixmatch:
 
         return a.json()
 
-    async def spotify_lyrics(self, artist, track):
-        utoken = random.choice(self.token) if type(self.token) is list else self.token
+    async def spotify_lyrics(self, artist: str, track: str):
+        utoken = random.choice(self.token) if isinstance(self.token, list) else self.token
         a = await self.http.get(
             "https://apic.musixmatch.com/ws/1.1/macro.subtitles.get",
             params={
@@ -64,7 +66,7 @@ class Musixmatch:
         return a.json()
 
     async def translation(self, id, lang, letra=None):
-        utoken = random.choice(self.token) if type(self.token) is list else self.token
+        utoken = random.choice(self.token) if isinstance(self.token, list) else self.token
         a = await self.http.get(
             "https://apic.musixmatch.com/ws/1.1/crowd.track.translations.get",
             params={
@@ -91,10 +93,10 @@ class Musixmatch:
 
         return tr
 
-    async def auto(self, q=None, lang="pt", limit=5, id=None):
-        print("auto", q, lang, limit, id)
-        if q:
-            a = await self.search(q, limit)
+    async def auto(self, query=None, lang="pt", limit=5, id=None):
+        print("auto", query, lang, limit, id)
+        if query:
+            a = await self.search(query, limit)
             res = (
                 a["message"]["body"]["macro_result_list"]["track_list"]
                 if limit != 1
@@ -115,21 +117,21 @@ class Musixmatch:
             ret.append(b)
         return ret
 
-    def parse(self, q):
-        autor = q["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"][
+    def parse(self, query):
+        autor = query["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"][
             "track"
         ]["artist_name"]
-        musica = q["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"][
+        musica = query["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"][
             "track"
         ]["track_name"]
-        letra = q["message"]["body"]["macro_calls"]["track.lyrics.get"]["message"]["body"][
+        letra = query["message"]["body"]["macro_calls"]["track.lyrics.get"]["message"]["body"][
             "lyrics"
         ]["lyrics_body"]
-        link = q["message"]["body"]["macro_calls"]["track.lyrics.get"]["message"]["body"][
+        link = query["message"]["body"]["macro_calls"]["track.lyrics.get"]["message"]["body"][
             "lyrics"
         ]["backlink_url"].split("?")[0]
-        traducao = q.get("translate", None)
-        id = q["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"]["track"][
+        traducao = query.get("translate", None)
+        id = query["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"]["track"][
             "track_id"
         ]
         return {
