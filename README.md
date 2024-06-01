@@ -1,19 +1,19 @@
 <h6 align="center">
-  <img src="https://piics.ml/i/011.png" alt="LyricsPy" height="250px">
-  <h5 align="center">A library to search for music lyrics.</h5>
+  <img src="https://raw.githubusercontent.com/edubr029/piics/master/i/011.png" alt="LyricsPy" height="250px">
+  <h5 align="center">A library for searching music lyrics.</h5>
 </h6>
 
 ## Installation
 
-LyricsPy can be installed using pip from PyPI or from GitHub
+You can install LyricsPy using pip either from PyPI or GitHub.
 
-#### via PyPI using pip
+### Install via PyPI
 
 ```bash
 pip install -U lyricspy
 ```
 
-#### via GitHub using pip+git
+### Install via GitHub
 
 ```bash
 pip install -U git+https://github.com/AmanoTeam/LyricsPy
@@ -21,16 +21,25 @@ pip install -U git+https://github.com/AmanoTeam/LyricsPy
 
 ## Usage
 
-To use LyricsPy is easy, but let's see some examples:
+Using LyricsPy is straightforward. Here are some examples:
 
-### Musixmatch example
+### Example with Musixmatch
 
 ```python
+import asyncio
+from pprint import pprint
+
 from lyricspy import Musixmatch
-from json import dump
 
-search = Musixmatch("Musixmatch key").auto("Hello",lang="pt" , limit=1)
+async def main():
+    musixmatch = Musixmatch([
+        "Musixmatch API key 1",
+        "Musixmatch API key 2",
+    ])
+    search = await musixmatch.auto("Hello", lang="pt", limit=1)
+    parsed_output = musixmatch.parse(search[0])
 
-with open("lyrics.json", "w") as f:
-  dump(search, f)
+    pprint(parsed_output, indent=4)
+
+asyncio.run(main())
 ```
