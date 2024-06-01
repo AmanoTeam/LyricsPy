@@ -120,27 +120,15 @@ class Musixmatch:
 
     @staticmethod
     def parse(query):
-        autor = query["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"][
-            "track"
-        ]["artist_name"]
-        musica = query["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"][
-            "track"
-        ]["track_name"]
-        letra = query["message"]["body"]["macro_calls"]["track.lyrics.get"]["message"]["body"][
-            "lyrics"
-        ]["lyrics_body"]
-        link = query["message"]["body"]["macro_calls"]["track.lyrics.get"]["message"]["body"][
-            "lyrics"
-        ]["backlink_url"].split("?")[0]
-        traducao = query.get("translate", None)
-        id = query["message"]["body"]["macro_calls"]["matcher.track.get"]["message"]["body"][
-            "track"
-        ]["track_id"]
+        macro_calls = query["message"]["body"]["macro_calls"]
+        track_data = macro_calls["matcher.track.get"]["message"]["body"]["track"]
+        lyrics_data = macro_calls["track.lyrics.get"]["message"]["body"]["lyrics"]
+
         return {
-            "autor": autor,
-            "musica": musica,
-            "letra": letra,
-            "link": link,
-            "traducao": traducao,
-            "id": id,
+            "autor": track_data["artist_name"],
+            "musica": track_data["track_name"],
+            "letra": lyrics_data["lyrics_body"],
+            "link": lyrics_data["backlink_url"].split("?")[0],
+            "traducao": query.get("translate", None),
+            "id": track_data["track_id"],
         }

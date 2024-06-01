@@ -51,17 +51,11 @@ class Letras:
 
     @staticmethod
     def parse(query):
-        autor = query["art"]
-        musica = query["txt"]
-        letra = query["letra"]
-        link = query["link"]
-        traducao = query["traducao"]
-        id = query["id"]
         return {
-            "autor": autor,
-            "musica": musica,
-            "letra": letra,
-            "link": link,
-            "traducao": traducao,
-            "id": id,
+            "autor": query["art"],
+            "musica": query["txt"],
+            "letra": query["letra"],
+            "link": query["link"],
+            "traducao": query["traducao"],
+            "id": query["id"],
         }
