@@ -11,9 +11,9 @@ headers = {
 
 
 class Musixmatch:
-    def __init__(self, usertoken: str | list):
+    def __init__(self, usertoken: str | list[str]):
         self.token = usertoken
-        self.http = httpx.AsyncClient(http2=True)
+        self.http = httpx.AsyncClient(http2=True, follow_redirects=True)
 
     async def search(self, query: str, limit: int):
         utoken = random.choice(self.token) if isinstance(self.token, list) else self.token
@@ -44,13 +44,13 @@ class Musixmatch:
                 "format": "json",
             },
             headers=headers,
-            follow_redirects=True,
         )
 
         return a.json()
 
     async def spotify_lyrics(self, artist: str, track: str):
         utoken = random.choice(self.token) if isinstance(self.token, list) else self.token
+
         a = await self.http.get(
             "https://apic.musixmatch.com/ws/1.1/macro.subtitles.get",
             params={
@@ -61,13 +61,13 @@ class Musixmatch:
                 "format": "json",
             },
             headers=headers,
-            follow_redirects=True,
         )
 
         return a.json()
 
     async def translation(self, id, lang, letra=None):
         utoken = random.choice(self.token) if isinstance(self.token, list) else self.token
+
         a = await self.http.get(
             "https://apic.musixmatch.com/ws/1.1/crowd.track.translations.get",
             params={
@@ -80,7 +80,6 @@ class Musixmatch:
             },
             headers=headers,
         )
-        print(a.url)
         c = a.json()
         if c["message"]["body"]["translations_list"] and letra:
             tr = letra
@@ -95,7 +94,6 @@ class Musixmatch:
         return tr
 
     async def auto(self, query=None, lang="pt", limit=5, id=None):
-        print("auto", query, lang, limit, id)
         if query:
             a = await self.search(query, limit)
             res = (
