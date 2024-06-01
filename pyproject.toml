@@ -21,7 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = ["httpx", "beautifulsoup4"]
+dependencies = ["httpx[http2]", "beautifulsoup4"]
 
 [tool.hatch.version]
 path = "lyricspy/__init__.py"
