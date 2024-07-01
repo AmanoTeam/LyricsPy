@@ -12,7 +12,7 @@ headers = {
 
 
 class Musixmatch:
-    def __init__(self, usertoken: Union[str, list]):
+    def __init__(self, usertoken: Union[str, list] = None):
         self.token = usertoken
         self.http = httpx.Client(http2=True, follow_redirects=True)
 
