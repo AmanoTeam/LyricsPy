@@ -4,6 +4,7 @@ from typing import Union
 
 import httpx
 from bs4 import BeautifulSoup
+from uuid import uuid4
 
 headers = {
     "Connection": "Keep-Alive",
@@ -17,7 +18,7 @@ class Musixmatch:
         a = await self.http.get(
             "https://apic.musixmatch.com/ws/1.1/token.get",
             params=dict(
-                app_id="android-player-v1.0", guid="12ecc059dc933fca", format="json"
+                app_id="android-player-v1.0", guid=str(uuid4()), format="json"
             ),
             headers=headers,
         )

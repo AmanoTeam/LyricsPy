@@ -4,11 +4,17 @@ from typing import Union
 
 import httpx
 from bs4 import BeautifulSoup
+from uuid import uuid4
 
 headers = {
     "Connection": "Keep-Alive",
-    "User-Agent": "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Musixmatch/0.19.4 Chrome/58.0.3029.110 Electron/1.7.6 Safari/537.36 ",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Musixmatch/0.19.4 Chrome/58.0.3029.110 Electron/1.7.6 Safari/537.36",
 }
+
+
+class CaptchaError(Exception):
+    def __init__(self, message):
+        super(CaptchaError, self).__init__(message)
 
 
 class Musixmatch:
@@ -17,17 +23,26 @@ class Musixmatch:
         self.http = httpx.Client(http2=True, follow_redirects=True)
 
     def gen_token(self):
+        print("gen_token")
         a = self.http.get(
             "https://apic.musixmatch.com/ws/1.1/token.get",
             params=dict(
-                app_id="web-desktop-app-v1.0", guid="12ecc059dc933fca", format="json"
+                app_id="web-desktop-app-v1.0", guid=str(uuid4()), format="json"
             ),
             headers=headers,
         )
-        return a.json()["message"]["body"]["user_token"]
+        print(a.text)
+        ajson = a.json()
+        if ajson["message"]["header"]["status_code"] == 401 and ajson["message"]["header"]["hint"] == "captcha":
+            raise CaptchaError("Captcha required")
+        else:
+            return ajson["message"]["body"]["user_token"]
 
     def search(self, q, limit):
-        utoken = random.choice(self.token) if type(self.token) is list else self.token
+        if not self.token:
+            utoken = self.gen_token()
+        else:
+            utoken = random.choice(self.token) if type(self.token) is list else self.token
         a = self.http.get(
             "https://apic.musixmatch.com/ws/1.1/macro.search",
             params=dict(
@@ -43,7 +58,10 @@ class Musixmatch:
         return a.json()
 
     def lyrics(self, id=None, artist=None, track=None):
-        utoken = random.choice(self.token) if type(self.token) is list else self.token
+        if not self.token:
+            utoken = self.gen_token()
+        else:
+            utoken = random.choice(self.token) if type(self.token) is list else self.token
         a = self.http.get(
             "https://apic.musixmatch.com/ws/1.1/macro.subtitles.get",
             params=dict(
@@ -61,7 +79,10 @@ class Musixmatch:
         return a.json()
 
     def translation(self, id, lang):
-        utoken = random.choice(self.token) if type(self.token) is list else self.token
+        if not self.token:
+            utoken = self.gen_token()
+        else:
+            utoken = random.choice(self.token) if type(self.token) is list else self.token
         a = self.http.get(
             "https://apic.musixmatch.com/ws/1.1/crowd.track.translations.get",
             params=dict(
