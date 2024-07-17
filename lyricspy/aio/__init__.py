@@ -221,3 +221,59 @@ class Letras:
             "id": id,
         }
         return ret
+
+class Genius:
+    def __init__(self, token=None):
+        self.token = (
+            token
+            if token
+            else "ZTejoT_ojOEasIkT9WrMBhBQOz6eYKK5QULCMECmOhvwqjRZ6WbpamFe3geHnvp3"
+        )
+
+    async def lyrics(self, id):
+        async with httpx.AsyncClient(http2=True) as client:
+            response = await client.get(
+                f"https://api.genius.com/songs/{id}",
+                params={"text_format": "plain"},
+                headers={"Authorization": f"Bearer {self.token}"},
+            )
+
+        return response.json()
+
+    async def search(self, query):
+        async with httpx.AsyncClient(http2=True, follow_redirects=True) as client:
+            response = await client.get(
+                "https://api.genius.com/search",
+                params={"q": query},
+                headers={"Authorization": f"Bearer {self.token}"},
+            )
+
+        return response.json()["response"]["hits"]
+
+    async def auto(self, query, limit=4):
+        result = []
+        hits = await self.search(query)
+        for i in hits:
+            print(i["result"]["id"])
+            lyrics = await self.lyrics(i["result"]["id"])
+            result.append(lyrics)
+            if len(result) == limit:
+                break
+        return result
+
+    def parse(self, q):
+        autor = q["response"]["song"]["primary_artist"]["name"]
+        musica = q["response"]["song"]["title"]
+        letra = q["response"]["song"]["lyrics"]["plain"]
+        link = q["response"]["song"]["url"]
+        traducao = None
+        id = q["response"]["song"]["id"]
+        ret = {
+            "autor": autor,
+            "musica": musica,
+            "letra": letra,
+            "link": link,
+            "traducao": traducao,
+            "id": id,
+        }
+        return ret
