@@ -198,3 +198,52 @@ class Letras:
             "id": id,
         }
         return ret
+
+class Genius:
+    def __init__(self, token=str) -> None:
+        self.http = httpx.Client(http2=True)
+        self.token = token
+    
+    def search(self, query, limit=5) -> dict:
+        a = self.http.get(
+            "https://api.genius.com/search",
+            params=dict(q=query, access_token=self.token),
+            headers=headers,
+        )
+        return a.json()
+    
+    def lyrics(self, id) -> dict:
+        a = self.http.get(
+            f"https://api.genius.com/songs/{id}",
+            params=dict(access_token=self.token),
+            headers=headers,
+        )
+        return a.json()
+    
+    def auto(self, query, limit=5) -> dict:
+        a = self.search(query, limit)
+        res = a["response"]["hits"]
+        ret = []
+        for i in res:
+            id = i["result"]["id"]
+            b = self.lyrics(id)
+            letra = b["response"]["song"]["lyrics"]
+            ret.append({"letra": letra})
+        return ret
+    
+    def parce(self, q):
+        autor = q["response"]["song"]["primary_artist"]["name"]
+        musica = q["response"]["song"]["title"]
+        letra = q["response"]["song"]["lyrics"]["plain"]
+        link = q["response"]["song"]["url"]
+        traducao = None
+        id = q["response"]["song"]["id"]
+        ret = {
+            "autor": autor,
+            "musica": musica,
+            "letra": letra,
+            "link": link,
+            "traducao": traducao,
+            "id": id,
+        }
+        return ret
